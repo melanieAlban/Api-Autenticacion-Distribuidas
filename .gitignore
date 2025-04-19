@@ -1,0 +1,28 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+dist/
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+logs/*
+
+# VSCode
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+
+# Prisma (si lo llegas a usar en el futuro)
+prisma/dev.db
+prisma/dev.db-journal
