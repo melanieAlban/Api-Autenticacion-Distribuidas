@@ -6,7 +6,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction): vo
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({ message: "Token no proporcionado o formato inválido" });
-    return;
+    return; // Esto está bien, ya que termina el flujo
   }
 
   const token = authHeader.split(" ")[1];
@@ -17,17 +17,19 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction): vo
     next();
   } catch (error) {
     res.status(401).json({ message: "Token inválido o expirado" });
+    return; // Esto está bien, ya que termina el flujo
   }
 };
 
 export const checkRole = (roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const user = (req as any).user;
-    
+
     if (!user || !roles.includes(user.role)) {
-      return res.status(403).json({ message: "Acceso no autorizado" });
+      res.status(403).json({ message: "Acceso no autorizado" });
+      return; // Asegura que el flujo termine aquí
     }
-    
+
     next();
   };
 };
