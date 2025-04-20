@@ -4,18 +4,9 @@ import { verifyToken, checkRole } from "../middleware/auth.middleware";
 
 const router = Router();
 
-/**
- * @swagger
- * tags:
- *   name: Gateway
- *   description: API Gateway para redirigir solicitudes a microservicios
- */
-
-// Middleware para capturar errores del proxy
 const errorHandler = (proxyMiddleware: any, errorMessage: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Ejecutamos el middleware del proxy
       await new Promise<void>((resolve, reject) => {
         proxyMiddleware(req, res, (err: any) => {
           if (err) {
@@ -25,7 +16,6 @@ const errorHandler = (proxyMiddleware: any, errorMessage: string) => {
           }
         });
       });
-      // Si no hay error, continuamos
       next();
     } catch (error) {
       console.error(errorMessage, error);
@@ -34,42 +24,36 @@ const errorHandler = (proxyMiddleware: any, errorMessage: string) => {
   };
 };
 
-// Configuración del proxy para el Microservicio de Administración
 const adminProxy = createProxyMiddleware({
-  
-  target: process.env.ADMIN_SERVICE_URL , // URL del Microservicio de Administración
+  target: process.env.ADMIN_SERVICE_URL || "http://localhost:3001",
   changeOrigin: true,
   pathRewrite: {
-    "^/api/admin": "/api", // Reescribe /api/admin a /api
-  },
-  secure: false, // Cambia a true en producción con certificados válidos
-});
-
-// Configuración del proxy para el Microservicio de Consultas
-const hospitalProxy = createProxyMiddleware({
-  target: process.env.HOSPITAL_SERVICE_URL , // URL del Microservicio de Consultas
-  changeOrigin: true,
-  pathRewrite: {
-    "^/api/hospital": "/api", // Reescribe /api/hospital a /api
+    "^/api/admin": "/api",
   },
   secure: false,
 });
 
-// Ruta para el Microservicio de Administración (/api/admin/*)
+const hospitalProxy = createProxyMiddleware({
+  target: process.env.HOSPITAL_SERVICE_URL || "http://localhost:3002",
+  changeOrigin: true,
+  pathRewrite: {
+    "^/api/hospital": "/api",
+  },
+  secure: false,
+});
+
 router.use(
-  /^\/admin(\/.*)?$/,
+  "/admin",
   verifyToken,
   checkRole(["admin"]),
   errorHandler(adminProxy, "Microservicio de Administración no disponible")
 );
 
-// Ruta para el Microservicio de Consultas (/api/hospital/*)
 router.use(
-  /^\/hospital(\/.*)?$/,
+  "/hospital",
   verifyToken,
   checkRole(["general", "admin"]),
   errorHandler(hospitalProxy, "Microservicio de Consultas no disponible")
 );
-
 
 export default router;
