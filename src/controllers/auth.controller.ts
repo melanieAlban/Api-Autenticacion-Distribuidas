@@ -121,3 +121,57 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
       res.status(500).json({ message: "Error interno del servidor" });
   }
 };
+
+export const updateUser = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { username, password, role } = req.body;
+
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOne({ where: { id: Number(id) } });
+
+    if (!user) {
+      res.status(404).json({ message: "Usuario no encontrado" });
+      return;
+    }
+
+    if (username) user.username = username;
+    if (password) user.password = await bcrypt.hash(password, 10); // Se recomienda rehashear
+    if (role) user.role = role;
+
+    await userRepository.save(user);
+
+    res.status(200).json({
+      message: "Usuario actualizado exitosamente",
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+export const deleteUser = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOne({ where: { id: Number(id) } });
+
+    if (!user) {
+      res.status(404).json({ message: "Usuario no encontrado" });
+      return;
+    }
+
+    await userRepository.remove(user);
+
+    res.status(200).json({ message: "Usuario eliminado exitosamente" });
+  } catch (error) {
+    console.error("Error al eliminar usuario:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
