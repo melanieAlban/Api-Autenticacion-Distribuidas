@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, register, getAllUsers } from "../controllers/auth.controller";
+import { login, register, getAllUsers, updateUser, deleteUser } from "../controllers/auth.controller";
 
 const authRouter = Router();
 
@@ -57,7 +57,8 @@ const authRouter = Router();
  *         description: Credenciales inválidas
  *       500:
  *         description: Error del servidor
- *  @swagger
+ *
+ * @swagger
  * /api/auth/register:
  *   post:
  *     summary: Registrar nuevo usuario
@@ -82,7 +83,8 @@ const authRouter = Router();
  *         description: Usuario creado
  *       400:
  *         description: Error en la solicitud
- *  @swagger
+ *
+ * @swagger
  * /api/auth/users:
  *   get:
  *     summary: Obtener todos los usuarios (Solo admin)
@@ -109,7 +111,70 @@ const authRouter = Router();
  *         description: No autorizado
  *       500:
  *         description: Error del servidor
+ *
+ * @swagger
+ * /api/auth/users/{id}:
+ *   put:
+ *     summary: Actualizar un usuario (Solo admin)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [general, admin]
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado correctamente
+ *       400:
+ *         description: Datos inválidos
+ *       403:
+ *         description: No autorizado
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error del servidor
+ *
+ *   delete:
+ *     summary: Eliminar un usuario (Solo admin)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario a eliminar
+ *     responses:
+ *       200:
+ *         description: Usuario eliminado correctamente
+ *       403:
+ *         description: No autorizado
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error del servidor
  */
+
 authRouter.post("/login", login);
 authRouter.post("/register", async (req, res, next) => {
     try {
@@ -119,6 +184,7 @@ authRouter.post("/register", async (req, res, next) => {
     }
 });
 authRouter.get("/users", getAllUsers);
-
+authRouter.put("/users/:id", updateUser);
+authRouter.delete("/users/:id", deleteUser);
 
 export default authRouter;
