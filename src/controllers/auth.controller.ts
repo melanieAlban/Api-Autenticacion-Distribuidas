@@ -31,7 +31,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       { 
         userId: user.id, 
         username: user.username, 
-        role: user.role 
+        role: user.role,
+        centro: user.centro
       }, 
       process.env.JWT_SECRET!,
       { expiresIn: "1h" }
@@ -42,7 +43,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       user: {
         id: user.id,
         username: user.username,
-        role: user.role
+        role: user.role,
+        centro: user.centro
       }
     });
   } catch (error) {
@@ -52,7 +54,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { username, password, role = 'general' } = req.body;
+  const { username, password, role = 'general',centro } = req.body;
 
   // Validaciones básicas
   if (!username || !password) {
@@ -61,6 +63,10 @@ export const register = async (req: Request, res: Response) => {
 
   if (password.length < 4) {
       return res.status(400).json({ message: "La contraseña debe tener al menos 4 caracteres" });
+  }
+
+  if(centro !=2 && centro !=3 && centro !=1){
+    return res.status(400).json({ message: "El centro no es válido" });
   }
 
   try {
@@ -77,13 +83,14 @@ export const register = async (req: Request, res: Response) => {
       newUser.username = username;
       newUser.password = password; // Se hasheará automáticamente con @BeforeInsert
       newUser.role = role;
+      newUser.centro = centro; 
 
       // Guardar en la base de datos
       await userRepository.save(newUser);
 
       // Generar token JWT
       const token = jwt.sign(
-          { userId: newUser.id, username: newUser.username, role: newUser.role },
+          { userId: newUser.id, username: newUser.username, role: newUser.role,centro: newUser.centro },
           process.env.JWT_SECRET!,
           { expiresIn: '1h' }
       );
@@ -95,7 +102,8 @@ export const register = async (req: Request, res: Response) => {
           user: {
               id: newUser.id,
               username: newUser.username,
-              role: newUser.role
+              role: newUser.role,
+              centro: newUser.centro
           }
       });
       return
@@ -111,7 +119,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
   try {
       const userRepository = AppDataSource.getRepository(User);
       const users = await userRepository.find({
-          select: ['id', 'username', 'role'], // Excluye el password por seguridad
+          select: ['id', 'username', 'role','centro'], // Excluye el password por seguridad
           order: { id: 'ASC' }
       });
 
@@ -125,6 +133,8 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
 export const updateUser = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const { username, password, role } = req.body;
+  const { centro } = req.body;
+
 
   try {
     const userRepository = AppDataSource.getRepository(User);
@@ -138,7 +148,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     if (username) user.username = username;
     if (password) user.password = await bcrypt.hash(password, 10); // Se recomienda rehashear
     if (role) user.role = role;
-
+    if (centro) user.centro = centro;
     await userRepository.save(user);
 
     res.status(200).json({
