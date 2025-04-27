@@ -12,14 +12,12 @@ dotenv.config();
 const app = express();
 
 // Middlewares
-app.use(express.json());
 app.use(morgan("dev"));
 
 // 2. Configuración CORS (¡Colócalo aquí, antes de las rutas!)
 app.use(cors({
-  origin: '*', // Permite todos los orígenes (en producción especifica dominios)
+  origin: 'http://localhost:5173',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   credentials: true
 }));
 
@@ -29,7 +27,7 @@ AppDataSource.initialize()
   .catch((error) => console.log("Database error:", error));
 
 // Rutas
-app.use("/api/auth", authRouter);
+app.use("/api/auth",express.json(), authRouter);
 app.use("/api", gatewayRouter);
 
 // Swagger
