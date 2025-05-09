@@ -65,7 +65,7 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "La contraseña debe tener al menos 4 caracteres" });
   }
 
-  if(centro !=2 && centro !=3 && centro !=1){
+  if(centro !=2 && centro !=3 && centro !=1 && centro !=4){
     return res.status(400).json({ message: "El centro no es válido" });
   }
 
