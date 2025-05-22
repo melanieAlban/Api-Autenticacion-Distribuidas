@@ -14,6 +14,8 @@ export class User {
 
     @Column({ default: 'general' })
     role!: string; // 'admin' o 'general'
+    @Column({type: 'int'})
+    centro!: number; 
 
     @BeforeInsert()
     async hashPassword() {

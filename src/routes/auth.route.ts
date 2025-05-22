@@ -107,6 +107,8 @@ const authRouter = Router();
  *                     type: string
  *                   role:
  *                     type: string
+ *                   centro:  
+ *                     type: number
  *       403:
  *         description: No autorizado
  *       500:

@@ -27,7 +27,7 @@ export const checkRole = (roles: string[]) => {
 
     if (!user || !roles.includes(user.role)) {
       res.status(403).json({ message: "Acceso no autorizado" });
-      return; // Asegura que el flujo termine aquí
+      return; 
     }
 
     next();
